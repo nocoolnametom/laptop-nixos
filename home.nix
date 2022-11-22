@@ -129,6 +129,7 @@ in {
     pkgs.obsidian
     pkgs.silver-searcher
     pkgs.screen
+    pkgs.ktouch # typing tutor
   ];
 
   # Spotify Speaker

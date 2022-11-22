@@ -35,7 +35,7 @@ in {
 
       # Apps for only Pop_OS!
       home.packages = [
-
+        pkgs.gnome-connections
       ];
     })
     (mkIf (cfg.isNixos) {
@@ -48,6 +48,7 @@ in {
       # Apps for only NixOS
       home.packages = [
         pkgs.firefox # Fotns get messed up on Pop_OS if Nix Firefox is used
+        pkgs.krdc # RDP client
         pkgs.wget pkgs.rsync pkgs.steam pkgs.steam-run pkgs.latte-dock ];
     })
   ]);
