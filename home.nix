@@ -19,6 +19,9 @@
 
     # Everything SSH
     ./ssh
+
+    # Protonmail Bridge
+    ./protonmail
   ];
 
   # Home Manager needs a bit of information about you and the
@@ -30,6 +33,12 @@
   services.barrier.client.server = "192.168.0.11:24801";
 
   services.dropbox.enable = true;
+
+  services.protonmail.enable = true;
+  services.protonmail.nonInteractive = true;
+
+  # Safe Eyes RSI prevention
+  services.safeeyes.enable = true;
 
   home.packages = [
     pkgs.nixfmt
@@ -43,6 +52,7 @@
     pkgs.silver-searcher
     pkgs.screen
     pkgs.ktouch # typing tutor
+    pkgs.wireguard-tools
   ];
 
   # Spotify Speaker

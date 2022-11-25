@@ -8,10 +8,7 @@ let
 
   # Pop_OS! specific settings
   popOsConf = rec {
-    home.stateVersion = "22.05";
-
-    # Safe Eyes RSI prevention
-    services.safeeyes.enable = true;
+    home.stateVersion = "22.11";
 
     # Home Manager is not installed on NixOS
     # Because of this, do not use this file in a NixOS configuration.nix module
@@ -23,10 +20,7 @@ let
 
   # NixOS specific settings
   nixOsConf = rec {
-    home.stateVersion = "22.05";
-
-    # RSI break (I like safe eyes better, but it's not avaialble on HM 22.05)
-    services.rsibreak.enable = true;
+    home.stateVersion = "22.11";
 
     # Apps for only NixOS
     home.packages = [
@@ -36,7 +30,7 @@ let
       pkgs.rsync
       pkgs.steam
       pkgs.steam-run
-      pkgs.latte-dock
+      pkgs.libsForQt5.applet-window-buttons
     ];
   };
 in {
