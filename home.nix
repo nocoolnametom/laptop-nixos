@@ -51,7 +51,6 @@
     pkgs.obsidian
     pkgs.silver-searcher
     pkgs.screen
-    pkgs.ktouch # typing tutor
     pkgs.wireguard-tools
   ];
 

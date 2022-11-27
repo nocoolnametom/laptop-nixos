@@ -31,6 +31,7 @@ let
       pkgs.steam
       pkgs.steam-run
       pkgs.libsForQt5.applet-window-buttons
+      pkgs.ktouch
     ];
   };
 in {
