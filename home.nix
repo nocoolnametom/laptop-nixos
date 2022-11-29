@@ -60,6 +60,10 @@
     pkgs.silver-searcher
     pkgs.screen
     pkgs.wireguard-tools
+    (pkgs.writeShellScriptBin "restart-systems-on-login" ''
+      sleep 10s
+      systemctl --user restart barrierc.service protonmail.service davmail.service workrave.service
+    '')
   ];
 
   # Spotify Speaker
