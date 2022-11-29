@@ -22,6 +22,9 @@
 
     # Protonmail Bridge
     ./protonmail
+
+    # Davmail
+    ./davmail
   ];
 
   # Home Manager needs a bit of information about you and the
@@ -36,6 +39,8 @@
 
   services.protonmail.enable = true;
   services.protonmail.nonInteractive = true;
+
+  services.davmail-config.enable = true;
 
   # Safe Eyes RSI prevention
   services.safeeyes.enable = true;

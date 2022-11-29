@@ -31,7 +31,9 @@ let
       pkgs.steam
       pkgs.steam-run
       pkgs.libsForQt5.applet-window-buttons
+      pkgs.libsForQt5.bismuth
       pkgs.ktouch
+      pkgs.kdeconnect
     ];
   };
 in {
