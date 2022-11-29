@@ -25,6 +25,9 @@
 
     # Davmail
     ./davmail
+
+    # Workrave
+    ./workrave
   ];
 
   # Home Manager needs a bit of information about you and the
@@ -42,8 +45,8 @@
 
   services.davmail-config.enable = true;
 
-  # Safe Eyes RSI prevention
-  services.safeeyes.enable = true;
+  # Workrave RSI prevention
+  services.workrave.enable = true;
 
   home.packages = [
     pkgs.nixfmt
