@@ -45,8 +45,8 @@
 
   services.davmail-config.enable = true;
 
-  # Workrave RSI prevention
-  services.workrave.enable = true;
+  # RSI prevention
+  services.safeeyes.enable = true;
 
   home.packages = [
     pkgs.nixfmt
@@ -62,8 +62,15 @@
     pkgs.wireguard-tools
     (pkgs.writeShellScriptBin "restart-systems-on-login" ''
       sleep 10s
-      systemctl --user restart barrierc.service protonmail.service davmail.service workrave.service
+      systemctl --user restart barrierc.service protonmail.service davmail.service safeeyes.service
     '')
+    (pkgs.appimageTools.wrapType2 {
+      name = "android-messages-desktop";
+      src = pkgs.fetchurl {
+        url = "https://github.com/OrangeDrangon/android-messages-desktop/releases/download/v5.4.0/Android-Messages-v5.4.0-linux-x86_64.AppImage";
+        hash = "sha256-Wbb7dS0h9FalNrF4f37sc1XJUIaeQsKwa/ULG2jMAzY=";
+      };
+    })
   ];
 
   # Spotify Speaker
