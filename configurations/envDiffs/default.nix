@@ -20,18 +20,23 @@ let
 
   # NixOS specific settings
   nixOsConf = rec {
+    # Note that since we can't import within imports when using Home Manager as a
+    # NixOS module, we need to load the NixOS-only imports in the main home.nix,
+    # so the NixOS-specific setting you're looking for may be located in one of
+    # those imports
+
     home.stateVersion = "22.11";
+
+    services.waynergy.enable = true;
 
     # Apps for only NixOS
     home.packages = [
-      pkgs.firefox # Fotns get messed up on Pop_OS if Nix Firefox is used
+      pkgs.firefox # Fonts get messed up on Pop_OS if Nix Firefox is used, so it's here
       pkgs.krdc # RDP client
       pkgs.wget
       pkgs.rsync
       pkgs.steam
       pkgs.steam-run
-      pkgs.libsForQt5.applet-window-buttons
-      pkgs.libsForQt5.bismuth
       pkgs.ktouch
       pkgs.kdeconnect
     ];

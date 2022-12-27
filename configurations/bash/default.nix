@@ -2,7 +2,6 @@
 
 let isNixos = builtins.pathExists /etc/nixos/configuration.nix;
 in {
-  programs.bash.enable = true;
   programs.bash.historyControl = [ "ignoredups" "ignorespace" ];
 
   # This incorporates the default .bashrc for Pop_OS! but it works just fine for NixOS, too

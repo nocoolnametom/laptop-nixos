@@ -46,7 +46,7 @@ in {
     systemd.user.services.protonmail = {
       Unit = {
         Description = "Protonmail Bridge";
-        After = [ "network.target" ];
+        After = [ "network-online.target" ];
       };
 
       Service = {

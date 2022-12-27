@@ -3,8 +3,16 @@
 with lib;
 
 let
-  oauthClientId = if builtins.pathExists ../myKeys/private/oauthClientId.txt then builtins.readFile ../myKeys/private/oauthClientId.txt else "";
-  oauthTenantId = if builtins.pathExists ../myKeys/private/oauthTenantId.txt then builtins.readFile ../myKeys/private/oauthTenantId.txt else "";
+  oauthClientId =
+    if builtins.pathExists ../../myKeys/private/oauthClientId.txt then
+      builtins.readFile ../../myKeys/private/oauthClientId.txt
+    else
+      "";
+  oauthTenantId =
+    if builtins.pathExists ../../myKeys/private/oauthTenantId.txt then
+      builtins.readFile ../../myKeys/private/oauthTenantId.txt
+    else
+      "";
   davmailConfig = ''
     #############################################################
     # Basic settings
@@ -178,7 +186,7 @@ in {
 
       Service = {
         Type = "oneshot";
-        RemainAfterExit= false;
+        RemainAfterExit = false;
         WorkingDirectory = "/home/tdoggett";
         ExecStart = "${pkgs.writeShellScript "davmail-immutable-copy" ''
           ${pkgs.coreutils}/bin/touch .davmail.properties \
@@ -197,7 +205,8 @@ in {
 
     systemd.user.services.davmail = {
       Unit.Description = "Davmail Exchange Gateway";
-      Unit.After = [ "davmail-immutable.service" "graphical-session-pre.target" ];
+      Unit.After =
+        [ "davmail-immutable.service" "graphical-session-pre.target" ];
       Unit.PartOf = [ "graphical-session.target" ];
       Install.WantedBy = [ "graphical-session.target" ];
 

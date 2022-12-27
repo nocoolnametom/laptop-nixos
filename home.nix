@@ -1,53 +1,113 @@
 { config, pkgs, ... }:
 
-{
+let
+  # I don't use the impermanence HM module, but we need to load HM via Nixos to ensure
+  # the symlinks are present in a fresh TMPFS version of /home/tdoggett, so make sure
+  # that home.nix is imported into /etc/nixos/configuration.nix
+  impermanence = builtins.fetchTarball {
+    url = "https://github.com/nix-community/impermanence/archive/master.tar.gz";
+  };
+  isNixosCheck = builtins.pathExists /etc/nixos/configuration.nix;
+in {
   imports = [
-    # Helpers to manage missing modules beteen laptop environments
-    # and their home-manager installations.
-    #
-    # This is because HM modules can't include imports within their
-    # configuration blocks, so these helpers use the presence of
-    # the NixOS configuration.nix file to import helpers for
-    # NixOs/non-NixOS home-managers
-    ./helpers
-
+    ## CONFIGURATION------------------------------------------------------------ ##
     # Specific configurations for NixOS vs. non-NixOS home-manager
-    ./envDiffs
+    ./configurations/envDiffs
 
-    # Everything Bash
-    ./bash
+    # Barrier - software KVM for X11
+    ./configurations/barrier
 
-    # Everything SSH
-    ./ssh
+    # Bash
+    ./configurations/bash
 
-    # Protonmail Bridge
-    ./protonmail
+    # SSH
+    ./configurations/ssh
 
     # Davmail
-    ./davmail
+    ./configurations/davmail
 
-    # Workrave
-    ./workrave
-  ];
+    # Dropbox
+    ./configurations/dropbox
+
+    # GPG
+    ./configurations/gpg
+
+    # Pass stuff
+    ./configurations/pass
+
+    # Playerctl
+    ./configurations/playerctld
+
+    # Protonmail
+    ./configurations/protonmail
+
+    # Safe Eyes
+    ./configurations/safeeyes
+
+    # Spotify
+    ./configurations/spotify
+
+    # VSCode
+    ./configurations/vscode
+
+    # Waynergy
+    ./configurations/waynergy
+
+    ## MODULES ----------------------------------------------------------------- ##
+    # Protonmail Bridge
+    ./modules/protonmail
+
+    # Davmail Service and Config File
+    ./modules/davmail
+
+  ] ++ (if isNixosCheck then [
+    # Since HM modules can't hold their own imports, we need to handle conditional importing here
+
+    # Impermanence helper functions
+    "${impermanence}/home-manager.nix"
+
+    ## CONFIGURATION ----------------------------------------------------------- ##
+    # Impermanence
+    ./configurations/persistence
+
+    # Sway
+    ./configurations/swaywm
+
+    ## MODULES ----------------------------------------------------------------- ##
+    # Synergy/Barrier client for Wayland
+    ./modules/waynergy
+  ] else
+    [
+      # These imports will only be used if we're not running NixOS
+    ]);
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username = "tdoggett";
   home.homeDirectory = "/home/tdoggett";
 
+  # Whether to write program configuration files to the home
+  programs.bash.enable = true;
+  programs.browserpass.enable = true;
+  programs.password-store.enable = true;
+  programs.ssh.enable = true;
+
+  # Whether to run services
   services.barrier.client.enable = true;
-  services.barrier.client.server = "192.168.0.11:24801";
-
-  services.dropbox.enable = true;
-
-  services.protonmail.enable = true;
-  services.protonmail.nonInteractive = true;
-
   services.davmail-config.enable = true;
-
-  # RSI prevention
+  services.dropbox.enable = true;
+  services.gnome-keyring.enable = true;
+  services.playerctld.enable = true;
+  services.protonmail.enable = true;
+  services.spotifyd.enable = true;
+  services.password-store-sync.enable = true;
   services.safeeyes.enable = true;
 
+  # Whether to install window managers
+  wayland.windowManager.sway.enable = true;
+  xsession.windowManager.i3.enable = true;
+
+  # Application installed to both NixOS and PopOS users through Home Manager
   home.packages = [
     pkgs.nixfmt
     pkgs.git
@@ -55,10 +115,10 @@
     pkgs.vlc
     pkgs.google-chrome
     pkgs.vim
-    pkgs.vscode
     pkgs.obsidian
     pkgs.silver-searcher
     pkgs.screen
+    pkgs.todoist-electron
     pkgs.wireguard-tools
     (pkgs.writeShellScriptBin "restart-systems-on-login" ''
       sleep 10s
@@ -67,53 +127,22 @@
     (pkgs.appimageTools.wrapType2 {
       name = "android-messages-desktop";
       src = pkgs.fetchurl {
-        url = "https://github.com/OrangeDrangon/android-messages-desktop/releases/download/v5.4.0/Android-Messages-v5.4.0-linux-x86_64.AppImage";
-        hash = "sha256-Wbb7dS0h9FalNrF4f37sc1XJUIaeQsKwa/ULG2jMAzY=";
+        url =
+          "https://github.com/OrangeDrangon/android-messages-desktop/releases/download/v5.4.1/Android-Messages-v5.4.1-linux-x86_64.AppImage";
+        hash = "sha256-JT/68wDGYr9Resmy5cN6bQrXm340gKWawPuDZ762Qmc=";
       };
     })
   ];
 
-  # Spotify Speaker
-  services.spotifyd.enable = true;
-  services.spotifyd.settings.global.username = "oey8uvlx90107ncq7chxkh504";
-  services.spotifyd.settings.global.passwordCmd =
-    "pass spotify.com/nocoolnametom@gmail.com | head -n1";
-  # We use the machine hostname to generate the Spotify speaker name
-  services.spotifyd.settings.global.device_name = "${
-      if (builtins.getEnv "HOSTNAME") != "" then
-        (builtins.getEnv "HOSTNAME")
-      else
-        (if builtins.pathExists /etc/hostname then
-          builtins.replaceStrings [ "\n" ] [ "" ]
-          (builtins.readFile /etc/hostname)
-        else
-          "toms-machine")
-    }-spotifyd";
-  services.spotifyd.settings.global.backend = "pulseaudio";
-  services.spotifyd.settings.global.device-type = "computer";
+  # Tell Electron to use Wayland
+  xdg.configFile."electron-flags.conf".text = ''
+    --enable-features=WaylandWindowDecorations
+    --ozone-platform-hint=auto
+  '';
 
-  # PlayerCtl Daemon service
-  services.playerctld.enable = true;
-
-  # Pass store sync
-  services.password-store-sync.enable = true;
-
-  # Browserpass
-  programs.browserpass.enable = true;
-  programs.browserpass.browsers = [ "brave" "chrome" "firefox" ];
-
-  # Gnu Pass and Automated Updates to Password Store
-  programs.password-store.enable = true;
-  programs.password-store.package =
-    pkgs.pass.withExtensions (exts: [ exts.pass-otp ]);
-  programs.password-store.settings.PASSWORD_STORE_DIR =
-    "${config.home.homeDirectory}/.password-store";
-
-  # GPG
-  # On non-NixOS try replacing /usr/bin/gpg, /usr/bin/gpg-agent,
-  # and /usr/bin/gpgconf with symlinks to the HM commands to
-  # prevent version mismatches.
-  programs.gpg.enable = true;
+  # Tell VSCode to use Wayland
+  xdg.configFile."code-flags.conf".source =
+    "${config.xdg.configFile."electron-flags.conf".source}";
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
