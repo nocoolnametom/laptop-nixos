@@ -4,13 +4,13 @@ with lib;
 
 let
   oauthClientId =
-    if builtins.pathExists ../../myKeys/private/oauthClientId.txt then
-      builtins.readFile ../../myKeys/private/oauthClientId.txt
+    if builtins.pathExists ../../../myKeys/private/oauthClientId.txt then
+      builtins.readFile ../../../myKeys/private/oauthClientId.txt
     else
       "";
   oauthTenantId =
-    if builtins.pathExists ../../myKeys/private/oauthTenantId.txt then
-      builtins.readFile ../../myKeys/private/oauthTenantId.txt
+    if builtins.pathExists ../../../myKeys/private/oauthTenantId.txt then
+      builtins.readFile ../../../myKeys/private/oauthTenantId.txt
     else
       "";
   davmailConfig = ''

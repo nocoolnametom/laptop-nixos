@@ -12,53 +12,53 @@ in {
   imports = [
     ## CONFIGURATION------------------------------------------------------------ ##
     # Specific configurations for NixOS vs. non-NixOS home-manager
-    ./configurations/envDiffs
+    ./home/configurations/envDiffs
 
     # Barrier - software KVM for X11
-    ./configurations/barrier
+    ./home/configurations/barrier
 
     # Bash
-    ./configurations/bash
+    ./home/configurations/bash
 
     # SSH
-    ./configurations/ssh
+    ./home/configurations/ssh
 
     # Davmail
-    ./configurations/davmail
-
-    # Dropbox
-    ./configurations/dropbox
+    ./home/configurations/davmail
 
     # GPG
-    ./configurations/gpg
+    ./home/configurations/gpg
 
     # Pass stuff
-    ./configurations/pass
+    ./home/configurations/pass
 
     # Playerctl
-    ./configurations/playerctld
+    ./home/configurations/playerctld
 
     # Protonmail
-    ./configurations/protonmail
+    ./home/configurations/protonmail
 
-    # Safe Eyes
-    ./configurations/safeeyes
+    # RSI Break
+    ./home/configurations/rsibreak
 
     # Spotify
-    ./configurations/spotify
+    ./home/configurations/spotify
 
     # VSCode
-    ./configurations/vscode
+    ./home/configurations/vscode
 
     # Waynergy
-    ./configurations/waynergy
+    ./home/configurations/waynergy
 
     ## MODULES ----------------------------------------------------------------- ##
     # Protonmail Bridge
-    ./modules/protonmail
+    ./home/modules/protonmail
 
     # Davmail Service and Config File
-    ./modules/davmail
+    ./home/modules/davmail
+
+    # Maestral - Dropbox client
+    ./home/modules/maestral
 
   ] ++ (if isNixosCheck then [
     # Since HM modules can't hold their own imports, we need to handle conditional importing here
@@ -68,14 +68,14 @@ in {
 
     ## CONFIGURATION ----------------------------------------------------------- ##
     # Impermanence
-    ./configurations/persistence
+    ./home/configurations/persistence
 
     # Sway
-    ./configurations/swaywm
+    ./home/configurations/swaywm
 
     ## MODULES ----------------------------------------------------------------- ##
     # Synergy/Barrier client for Wayland
-    ./modules/waynergy
+    ./home/modules/waynergy
   ] else
     [
       # These imports will only be used if we're not running NixOS
@@ -95,13 +95,13 @@ in {
   # Whether to run services
   services.barrier.client.enable = true;
   services.davmail-config.enable = true;
-  services.dropbox.enable = true;
   services.gnome-keyring.enable = true;
+  services.maestral.enable = true;
+  services.password-store-sync.enable = true;
   services.playerctld.enable = true;
   services.protonmail.enable = true;
+  services.rsibreak.enable = true;
   services.spotifyd.enable = true;
-  services.password-store-sync.enable = true;
-  services.safeeyes.enable = true;
 
   # Whether to install window managers
   wayland.windowManager.sway.enable = true;
@@ -109,16 +109,16 @@ in {
 
   # Application installed to both NixOS and PopOS users through Home Manager
   home.packages = [
-    pkgs.nixfmt
-    pkgs.git
     pkgs.brave
-    pkgs.vlc
+    pkgs.git
     pkgs.google-chrome
-    pkgs.vim
+    pkgs.nixfmt
     pkgs.obsidian
-    pkgs.silver-searcher
     pkgs.screen
+    pkgs.silver-searcher
     pkgs.todoist-electron
+    pkgs.vim
+    pkgs.vlc
     pkgs.wireguard-tools
     (pkgs.writeShellScriptBin "restart-systems-on-login" ''
       sleep 10s
