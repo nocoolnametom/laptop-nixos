@@ -32,6 +32,7 @@ let
     # Apps for only NixOS
     home.packages = [
       pkgs.firefox # Fonts get messed up on Pop_OS if Nix Firefox is used, so it's here
+      pkgs.zoom-us # Easier to just install this via regular channels on Pop_OS
       pkgs.krdc # RDP client
       pkgs.wget
       pkgs.rsync

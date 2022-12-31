@@ -150,7 +150,6 @@
       "docker" # Manage docker resources
       "video" # Controls the monitor
     ];
-    packages = with pkgs; [ firefox thunderbird ];
   };
   users.groups.tdoggett.gid = 1000;
 
@@ -199,6 +198,7 @@
     wl-clipboard
     gnomeExtensions.appindicator
     git
+    gnumake
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
