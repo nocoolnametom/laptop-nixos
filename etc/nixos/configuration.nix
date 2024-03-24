@@ -2,12 +2,15 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-{
+let
+  nixos-hardware = builtins.fetchGit { url = "https://github.com/NixOS/nixos-hardware.git"; };
+  home-manager = builtins.fetchGit { url = "https://github.com/nix-community/home-manager"; };
+in {
   imports = [
-    <nixos-hardware/system76>
-    <home-manager/nixos>
+    "${nixos-hardware}"
+    "${home-manager}/nixos"
     /nix/persist/etc/nixos/hardware-configuration.nix
     ./config/persistence
   ];
@@ -24,13 +27,29 @@
   boot.initrd.luks.devices.luksroot.device = "/dev/nvme0n1p3";
   boot.initrd.luks.devices.luksroot.preLVM = true;
   boot.initrd.luks.devices.luksroot.allowDiscards = true;
+  boot.initrd.luks.devices.luksroot.yubikey.slot = 2;
+  boot.initrd.luks.devices.luksroot.yubikey.twoFactor = false;
+  boot.initrd.luks.devices.luksroot.yubikey.storage.device = "/dev/nvme0n1p1";
+  boot.initrd.luks.devices.luksroot.yubikey.storage.fsType = "vfat";
+  boot.initrd.luks.devices.luksroot.yubikey.storage.path = "/crypt-storage/default";
+  boot.initrd.luks.yubikeySupport = true;
 
   networking.hostName = "system76-laptop"; # Define your hostname.
-  # networking.networkmanager.enable = true;
-  networking.wireless.enable = true;
+  networking.networkmanager.enable = true;
+  networking.wireless.iwd.enable = true;
+  networking.networkmanager.wifi.backend = "iwd";
+  # networking.wireless.enable = true;
   networking.wireless.userControlled.enable = true;
+  networking.wireless.networks."Doggett-Wifi6".pskRaw =
+    "14b01db5ee261a91968738011d6950ac43fdb428ab97d15bbb2c95edaf2f6372";
   networking.wireless.networks."Doggett-Google".pskRaw =
     "14b01db5ee261a91968738011d6950ac43fdb428ab97d15bbb2c95edaf2f6372";
+
+  networking.wireless.networks."Pixel_6633".psk =
+    "hhznzrn8sezhw7h";
+
+  networking.wireless.networks."IHG ONE REWARDS Free WI-FI" = {};
+  networking.wireless.networks."MarriottBonvoy_Guest" = {};
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -44,11 +63,11 @@
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkbOptions in tty.
-  # };
+   console = {
+     font = "Lat2-Terminus16";
+     # keyMap = "us";
+     useXkbConfig = true; # use xkbOptions in tty.
+   };
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
@@ -79,8 +98,13 @@
   # services.gnome.evolution-data-server.enable = true;
   programs.dconf.enable = true;
 
-  # Ensure gnome-settings-daemon udev rules are enabled
-  services.udev.packages = [ pkgs.gnome.gnome-settings-daemon ];
+  services.udev.packages = [
+    # Ensure gnome-settings-daemon udev rules are enabled
+    pkgs.gnome.gnome-settings-daemon
+
+    # Allow Yubikey interactions
+    pkgs.yubikey-personalization
+  ];
 
   # Sway
   programs.sway.enable = true;
@@ -115,6 +139,15 @@
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
+  services.printing.drivers = [
+    pkgs.gutenprint
+    pkgs.gutenprintBin
+    pkgs.hplip
+  ];
+  services.avahi.enable = true;
+  services.avahi.nssmdns4 = true;
+  # for a WiFi printer
+  services.avahi.openFirewall = true;
 
   # Enable control of Blinkstick by non-root users
   services.udev.extraRules = ''
@@ -160,23 +193,45 @@
   home-manager.useUserPackages = true;
 
   # Sudo Stuff
-  security.sudo.extraRules = [{
-    users = [ "tdoggett" ];
-    commands = [{
-      command = "ALL";
-      options = [ "SETENV" "NOPASSWD" ];
-    }];
-  }];
+  # security.sudo.extraRules = [{
+  #   users = [ "tdoggett" ];
+  #   commands = [{
+  #     command = "ALL";
+  #     options = [ "SETENV" "NOPASSWD" ];
+  #   }];
+  # }];
   users.users.root.initialHashedPassword =
     "$6$8PyCfJmELrGkwHFQ$DVc6qIKQgSpnXepqaeFBv3ZbiE4vJ1x6QdkZpAe8AIZCg5uyXR1UEDj0shM7QtLpH5SEp22mzGh8kH.Z6m6DM1";
 
   # Only allow users hwo have sudo access to run `nix`
   nix.settings.allowed-users = [ "@wheel" ];
 
+  # U2F PAM module for Yubikey auth
+  security.pam.u2f.cue = true;
+  security.pam.services.login.u2fAuth = true;
+  security.pam.services.sudo.u2fAuth = true;
+
+  # Yubikey for login
+  security.pam.yubico.enable = true;
+  security.pam.yubico.debug = true; # I don't know why this line is here, just following the instructions
+  security.pam.yubico.mode = "challenge-response";
+  # security.pam.yubico.control = "required"; # Require multi-factor authentication with yubikeys
+
+  services.pcscd.enable = true;
+
   # Allow flakes
   nix.settings.experimental-features = "nix-command flakes";
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-25.9.0"
+    "electron-21.4.0"
+  ];
+  # nixpkgs.overlays = [
+  #   (final: previous: {
+  #     browserpass = (import <nixos-22.11> { }).browserpass;
+  #   })
+  # ];
   nix.settings.auto-optimise-store = true;
   nix.gc.automatic = true;
   nix.gc.dates = "weekly";
@@ -187,8 +242,9 @@
   '';
 
   # Virtualbox Setup
-  virtualisation.virtualbox.host.enable = true;
-  users.extraGroups.vboxusers.members = [ "@wheel" ];
+  # virtualisation.virtualbox.host.enable = true;
+  # virtualisation.virtualbox.host.enableExtensionPack = true;
+  # users.extraGroups.vboxusers.members = [ "@wheel" ];
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -199,15 +255,20 @@
     gnomeExtensions.appindicator
     git
     gnumake
+    dig
+    yubikey-personalization
+    pinentry-curses
+    deno
+    nodejs
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
+  programs.gnupg.agent.enable = true;
+  programs.gnupg.agent.enableSSHSupport = true;
+  # programs.gnupg.agent.pinentryFlavor = "qt";
+  programs.gnupg.agent.pinentryPackage = lib.mkForce pkgs.pinentry-qt;
 
   # List services that you want to enable:
 

@@ -29,4 +29,8 @@
   programs.ssh.matchBlocks.linode.user = "root";
   programs.ssh.matchBlocks.linode.port = 2222;
   programs.ssh.matchBlocks."exmormon.social".port = 2222;
+
+  # Steam Deck - Can ONLY be accessed via private keys
+  programs.ssh.matchBlocks.steamdeck.port = 9001;
+  programs.ssh.matchBlocks.steamdeck.user = "deck";
 }

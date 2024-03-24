@@ -28,6 +28,7 @@ in {
     "Pictures"
     "Music"
     "Videos"
+    "VirtualBox VMs"
   ];
 
   # Persisted user config stuff that can't be symlinked
@@ -42,6 +43,8 @@ in {
     ".mozilla"
 
     # GnuPG keys
+    ".yubico"
+    ".config/Yubico"
     ".gnupg"
     ".pki"
 
@@ -53,6 +56,9 @@ in {
 
     # Gnome Keyrings (for secrets storage)
     ".local/share/keyrings"
+
+    # Czkawka image hashing cache
+    ".cache/czkawka"
   ];
 
   # Persisted NixOS system-level stuff, stored alongisde the Nix store on the /nix partition

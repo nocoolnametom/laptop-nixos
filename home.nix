@@ -97,7 +97,8 @@ in {
   services.davmail-config.enable = true;
   services.gnome-keyring.enable = true;
   services.maestral.enable = true;
-  services.password-store-sync.enable = true;
+  # services.password-store-sync.enable = true;
+  # The password-store-sync has been removed and must be rebuilt manually using services.git-sync!
   services.playerctld.enable = true;
   services.protonmail.enable = true;
   services.rsibreak.enable = true;
@@ -109,11 +110,17 @@ in {
 
   # Application installed to both NixOS and PopOS users through Home Manager
   home.packages = [
+    pkgs.czkawka
+    pkgs.jellyfin-media-player
+    pkgs.slack
+    pkgs.foliate
     pkgs.brave
     pkgs.git
     pkgs.google-chrome
     pkgs.nixfmt
     pkgs.obsidian
+    pkgs.discord
+    pkgs.qtpass
     pkgs.screen
     pkgs.silver-searcher
     pkgs.todoist-electron
